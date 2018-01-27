@@ -1,0 +1,44 @@
+##############################################
+########### This is unit test file ###########
+##############################################
+1Setup
+# -> !!! The variable TEMP_DIR is predefined and can be used anywhere in this config file !!! <-
+SCRIPTS_DIR=${VAR_SCRIPTS}
+NOM_SH_PARENT=bptcrt
+DATE_CURR=$(date +%d/%m/%y)
+YEAR_MONTH=$(date +%Y%m)
+ACTIVE_MONTH=$(executeSql "select max(PROC_DATE_MONTH) from PROC_TABLE where UPPER(STATUS)='Y';")
+CUST_ID_CASE=99999999
+Expected_DIR=/home/cosmin/UnitTest/Files/Expected/
+11SetupFiles
+# FILE    DEST
+# Copy the FILE into DEST. If DEST is a file, it will be overwritten if it exists,
+# if DEST is a directory (ends with a forward slash /), the file will be copied into the directory
+# The DEST directory needs to exist, it will not be created.
+# /home/cosmin/UnitTest/Files/Input_File1.csv             /opt/informatica/source/
+12SetupDB
+DELETE FROM FACT_TABLE WHERE "CUST_ID=${CUST_ID_CASE};"
+## Table CUSTOMER
+"Insert into CUSTOMER (CUST_ID,CUST_NAME) values (${CUST_ID_CASE},'Cosmin POP');"
+##---------------------------------------
+##---------------------------------------
+2Run
+# Place here the command to run the Informatica workflow
+${SCRIPTS_DIR}/run_infa_job.sh
+##---------------------------------------
+##---------------------------------------
+3Compare
+31CompareFiles
+# We compare an expected output to the actual output. The format is:
+# <Expected output file>            <Actual output file>       <Ignore header#Nb of lines> <Ignore footer#Nb of lines>         <Field delimiter>          <Columns to compare>
+# Note that "Ignore header/footer" only applies to the actual output file (it doesn't make much sense on the expected file)
+# /home/cosmin/UnitTest/Files/Expected_Output1.csv.gz       /opt/informatica/target/Actual_Output.csv      Y#1        Y#1                ;              1,2,3
+32CompareDB
+# Here we compare a flat file to a DB export. For the DB export we only need the table name, the field names and the filtering conditions.
+# The "Expected" flat file will ALWAYS have headers, otherwise we won't know 2 years later what columns we are looking at
+# <Expected output file>            <Table name>  <Columns name>
+##---------------------------------------
+##---------------------------------------
+4Notify
+# List of people to be notified, comma separated
+cosmin.pop@gmail.com,cosmin.pop@gmail.com
